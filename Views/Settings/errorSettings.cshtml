@@ -1,0 +1,277 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "Error Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="font-weight: 700;color: rgb(0, 0, 0);">Hata Tanımlamaları</h1></div>
+        <div class="col-2 ">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#hataekle" onclick="openDialog(1, 0);">
+                Hata Ekle
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover" style="margin-top : 1%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 5%"></th>
+                <th scope="col" style="width: 5%"></th>
+                <th scope="col" style="width: 5%">Error Id</th>
+                <th scope="col" style="width: 40%">Error Name</th>
+                <th scope="col" style="width: 10%">Error Group</th>
+                <th scope="col" style="width: 5%">Dashboard Visible</th>
+                <th scope="col" style="width: 5%">Log Flag</th>
+                <th scope="col" style="width: 5%">Short List</th>
+                <th scope="col" style="width: 10%">Log Duration Threshold (s)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.errorsettings)
+            {
+                <tr>
+                    <th scope="row"><button class="btn btn-warning" data-bs-toggle="modal" onclick="openDialog(2, @item.ErrorId);" data-bs-target="#hataekle"><i class="fa-solid fa-pen-to-square" style="color: #ffffff;"></i></button></th>
+                    <th scope="row"><button class="btn btn-danger" data-bs-toggle="modal" onclick="setdelErrorId(@item.ErrorId);" data-bs-target="#deleteCheck"><i class="fa-solid fa-xmark" style="color:#ffffff"></i></button></th>
+                    <th scope="row">@item.ErrorId</th>
+                    <th scope="row">@item.ErrorName</th>
+                    <th scope="row">@item.ErrorGroup</th>
+
+                    
+                    @if (item.DashboardVisible)
+                    {
+                        <th scope="row"><div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="dashboard_visible" checked disabled>
+                        </div></th>
+                    } else
+                    {
+                        <th scope="row"><div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="dashboard_visible" disabled >
+                        </div>
+                    </th>
+                    }
+
+                    @if (item.RecordFlag)
+                    {
+                        <th scope="row">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="record_flag" checked disabled>
+                            </div>
+                        </th>
+                    }
+                    else
+                    {
+                        <th scope="row">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="record_flag" disabled>
+                            </div>
+                        </th>
+                    }
+
+                    @if ((bool)item.ShortList)
+                    {
+                        <th scope="row">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="record_flag" checked disabled>
+                            </div>
+                        </th>
+                    }
+                    else
+                    {
+                        <th scope="row">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="record_flag" disabled>
+                            </div>
+                        </th>
+                    }
+                    <th scope="row">@item.Duration</th>
+                </tr>
+                            
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="hataekle" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Hata Ekleme/Düzenleme Penceresi</h5>
+                <button type="button" id="kapat2" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ErrorAdd" action="@Url.Action("errorSettings","Settings")" method="POST">
+                    <label for="errorid" class="form-label">Error Id</label>
+                    <input type="text" class="form-control" id="errorid" name="ErrorId" autocomplete="off">
+                    <br />
+
+                    <label for="errorname" class="form-label">Error Name</label>
+                    <input type="text" class="form-control" id="errorname" name="ErrorName" autocomplete="off">
+                    <br />
+
+                    <label for="errorgroup" class="form-label">Error Group</label>
+                    <select id="errorgroup" class="form-select" aria-label="Error Group" name="ErrorGroup">
+                        <option id="op1" selected value="Fleet Control">Fleet Control</option>
+                        <option id="op2" value="Hardware">Hardware</option>
+                        <option id="op3" value="Laser Scanner">Laser Scanner</option>
+                        <option id="op4" value="Position">Position</option>
+                    </select>
+                    <br />
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="DashboardVisible" name="DashboardVisible">
+                        <label for="dashboard_visible" class="form-label">Dashboard Visible</label>
+                    </div>
+                    <br />
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="RecordFlag" name="RecordFlag">
+                        <label for="record_flag" class="form-label">Log Flag</label>
+                    </div>
+                    <br />
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="ShortList" name="ShortList">
+                        <label for="record_flag" class="form-label">Short List</label>
+                    </div>
+                    <br />
+                    <label for="customRange3" class="form-label">Log Duration Threshold</label> (<span id="rangeValue"></span>s)
+                    <input type="range" onchange="rangeChange();" class="form-range" min="30" max="300" step="10" id="durationRange" name="Duration">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="kapat" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" id="error_add" onclick="errorAdd();" class="btn btn-primary"><span id="buttonValue"></span></button>
+                <div class="spinner-border" style="visibility:hidden;" id="spin">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Validate Modal -->
+<div class="modal fade" id="deleteCheck" data-bs-backdrop="static" tabindex="-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" >Kayıt Silmeyi Onaylıyor musun?</h5>
+            </div>
+           
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" onclick="sendDelete();" class="btn btn-danger">Onaylıyorum</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let delErrorId = 0;
+
+    function errorAdd() {
+        
+        document.getElementById("spin").style.visibility = "visible";
+        document.getElementById("error_add").style.visibility = "hidden";
+        document.getElementById("kapat").style.visibility = "hidden";
+        document.getElementById("kapat2").style.visibility = "hidden";
+
+        let form = document.getElementById("ErrorAdd");
+        document.getElementById("DashboardVisible").value = document.getElementById("DashboardVisible").checked
+        document.getElementById("RecordFlag").value = document.getElementById("RecordFlag").checked
+        document.getElementById("ShortList").value = document.getElementById("ShortList").checked
+        console.log("value->", document.getElementById("ShortList").value)
+        form.submit();
+    }
+
+    function clearFormData(){
+        document.getElementById("errorid").value = "";
+        document.getElementById("errorname").value = "";
+        document.getElementById("errorgroup").selectpicker = "";
+        document.getElementById("DashboardVisible").checked = false;
+        document.getElementById("RecordFlag").checked = false;
+        document.getElementById("ShortList").checked = false;
+        document.getElementById("errorid").readOnly = false;
+        document.getElementById("durationRange").value = "90";
+        document.getElementById("rangeValue").innerText = document.getElementById("durationRange").value;
+    }
+
+    function openDialog(indicator, error_id)
+    {
+        if (indicator == 1)
+        {
+            clearFormData()
+
+            document.getElementById("buttonValue").innerText = "Ekle";
+        } else if(indicator == 2)
+        {
+            document.getElementById("spin").style.visibility = "visible";
+            document.getElementById("error_add").style.visibility = "hidden";
+            document.getElementById("kapat").style.visibility = "hidden";
+            document.getElementById("kapat2").style.visibility = "hidden";
+            clearFormData()
+            document.getElementById("errorid").readOnly = true;
+            $.ajax({
+                url: "@Url.Action("GetSpecificError","Settings")",
+                type: "POST",
+                data: { ErrorId: error_id },
+                success: function (data) {
+                    document.getElementById("errorid").value = String(data["errorId"]);
+                    document.getElementById("errorname").value = String(data["errorName"]);
+                    for (let i = 1; i < 5; i++) {
+                        let str = "op" + i;
+                      
+                        if (String(document.getElementById(str).value) == String(data["errorGroup"])) {
+                            document.getElementById(str).selected = "true";
+                        }
+                    }
+                    console.log(data)
+                    document.getElementById("DashboardVisible").checked = data["dashboardVisible"];
+                    document.getElementById("RecordFlag").checked = data["recordFlag"];
+                    document.getElementById("ShortList").checked = data["shortList"];
+                    document.getElementById("durationRange").value = String(data["duration"]);
+
+
+                    document.getElementById("rangeValue").innerText = document.getElementById("durationRange").value;
+
+                    document.getElementById("spin").style.visibility = "hidden";
+                    document.getElementById("error_add").style.visibility = "visible";
+                    document.getElementById("kapat").style.visibility = "visible";
+                    document.getElementById("kapat2").style.visibility = "visible";
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+
+                }
+            });
+            
+            document.getElementById("buttonValue").innerText = "Düzenle";
+        }
+    }
+
+    function setdelErrorId(error_id) {
+        delErrorId = error_id;
+    }
+
+    function sendDelete() {
+        let form = document.getElementById("ErrorAdd");
+        document.getElementById("errorid").value = delErrorId;
+        document.getElementById("errorname").value = "delete";
+        form.submit();
+    }
+
+    function rangeChange() {
+        let rangeValue = document.getElementById("durationRange").value;
+        document.getElementById("rangeValue").innerText = rangeValue;
+    }
+
+    let rangeValue = document.getElementById("durationRange").value;
+    document.getElementById("rangeValue").innerText = rangeValue;
+
+</script>

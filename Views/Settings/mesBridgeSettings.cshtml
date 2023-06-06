@@ -1,0 +1,132 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "Mes Bridge Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="margin: 15px;font-weight: 700;color: rgb(0, 0, 0);">MES Bridge Ayarları <div class="spinner-border" style="visibility:hidden;" id="spin"> </h1></div>
+        <div class="col-2">
+        </div>
+    </div>
+</div>
+
+<div class="container mx-3">
+    <div class="row">
+
+        <div class="spinner-border" style="visibility:hidden;" id="spin"></div> <span id="header"></span>
+
+        <div class="col-4" id="form">
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon1">SenderId</span>
+                    <input type="text" class="form-control" id="SenderId" onkeypress="return isNumberKey(event)" placeholder="100x" aria-describedby="basic-addon1" maxlength="4">
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group mb-3 ">
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0" type="checkbox" onchange="enableChange();" id="preReleaseNotation">
+                    </div>
+                    <span class="input-group-text">preRelease Point Notation</span>
+                    <input type="text" onkeypress="return isNumberKey(event);" id="preReleaseNotationText" placeholder="600x" class="form-control">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group mb-3 ">
+                    <span class="input-group-text">Request Interval</span>
+                    <input type="text" id="ReqTimeout" onkeypress="return isNumberKey(event);" placeholder="" class="form-control" maxlength="6">
+                    <span class="input-group-text" id="basic-addon2">milisaniye</span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group mb-3 ">
+                    <span class="input-group-text">Heart Beat Interval</span>
+                    <input type="text" id="HeartBeatInterval" onkeypress="return isNumberKey(event);" placeholder="" class="form-control" maxlength="6">
+                    <span class="input-group-text" id="basic-addon2">milisaniye</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="settingSave();" id="saveButton" class="btn btn-success">Save</button>
+            <spin style="color:forestgreen" id="saveStatus"></spin>
+        </div>
+        
+        <div class="col-8 px-5">
+            
+        </div>
+    
+    </div>
+</div>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:5001/mesHub").configureLogging(signalR.LogLevel.Information).build();
+
+    document.getElementById("spin").style.visibility = "visible";
+    document.getElementById("header").innerText = "Hub Connecting...";
+    document.getElementById("form").style.visibility = "hidden";
+    
+    async function start() {
+        await connection.start();
+        console.log("SignalR Connected.");
+        document.getElementById("spin").style.visibility = "hidden";
+        document.getElementById("header").innerText = "";
+        document.getElementById("form").style.visibility = "visible";
+
+        connection.on("setting", function (senderid, ReqInterval, HeartBeatInterval, PreReleaseNotation) {
+            document.getElementById("SenderId").value = senderid;
+            document.getElementById("ReqTimeout").value = ReqInterval;
+            document.getElementById("HeartBeatInterval").value = HeartBeatInterval;
+            document.getElementById("preReleaseNotationText").value = PreReleaseNotation;
+
+            if (PreReleaseNotation == "-1") {
+                document.getElementById("preReleaseNotation").checked = false;
+                document.getElementById("preReleaseNotationText").readOnly = true;
+            }
+            else {
+                document.getElementById("preReleaseNotation").checked = true;
+                document.getElementById("preReleaseNotationText").readOnly = false;
+            }
+
+
+        });
+
+            connection.invoke("Get_Setting");
+
+    };
+
+    start();
+        
+    function enableChange(){
+        if (document.getElementById("preReleaseNotation").checked == false)
+        {
+            document.getElementById("preReleaseNotationText").readOnly = true;
+            document.getElementById("preReleaseNotationText").value = "-1";
+        }
+        else {
+            document.getElementById("preReleaseNotationText").readOnly = false;
+            document.getElementById("preReleaseNotationText").value = "6000";
+        }
+    }
+
+    function settingSave(){
+        let senderid = parseInt(document.getElementById("SenderId").value);
+        let ReqInterval = parseInt(document.getElementById("ReqTimeout").value);
+        let HeartBeatInterval = parseInt(document.getElementById("HeartBeatInterval").value);
+        let PreReleaseNotation = parseInt(document.getElementById("preReleaseNotationText").value);
+        console.log(senderid, ReqInterval, HeartBeatInterval, PreReleaseNotation);
+        connection.invoke("Set_Setting", senderid, ReqInterval, HeartBeatInterval, PreReleaseNotation);
+        document.getElementById("saveStatus").innerText = "Saved";
+    }
+
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+            && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+</script>
+
+

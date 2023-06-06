@@ -1,0 +1,172 @@
+﻿@model AgvViewWindow.Models.MainModel 
+@{
+    ViewData["Title"] = "agvSettings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="font-weight: 700;color: rgb(0, 0, 0);">Agv Tanımlamaları</h1></div>
+        <div class="col-2 ">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal1" onclick="openDialog(1);">
+                Agv Ekle
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover" style="margin-top : 1%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 5%"></th>
+                <th scope="col" style="width: 5%"></th>
+                <th scope="col" style="width: 10%">Agv Id</th>
+                <th scope="col" style="width: 40%">Agv Name</th>
+                <th scope="col" style="width: 40%">Agv Group Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.agvinfos)
+            {
+                <tr>
+                    <th scope="row"><button class="btn btn-warning" data-bs-toggle="modal" onclick="openDialog(2, @item.AgvId, '@item.AgvName.ToString()', '@item.AgvGroupName.ToString()');" data-bs-target="#modal1">Edit</button></th>
+                    <th scope="row"><button class="btn btn-danger" data-bs-toggle="modal" onclick="delOperation(@item.AgvId);" data-bs-target="#deleteCheck">Del</button></th>
+                    <th scope="row">@item.AgvId</th>
+                    <th scope="row">@item.AgvName</th>
+                    <th scope="row">@item.AgvGroupName</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal1" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agv Ekleme/Düzenleme Penceresi</h5>
+                <button type="button" id="kapat2" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="AddForm" action="@Url.Action("agvSettings","Settings")" method="POST">
+                    <label class="form-label">AgvId</label>
+                    <input type="text" id="AgvId" onkeypress="return isNumberKey(event)" class="form-control" name="AgvId" autocomplete="off">
+                    <br />
+                    <label class="form-label">Agv Name</label>
+                    <input type="text" id="AgvName" class="form-control" name="AgvName" autocomplete="off">
+                    <br />
+                    <label class="form-label">Agv Type</label>
+
+                    <select class="form-select" id="AgvGroupName" NAME="AgvGroupName" aria-label="Avg Groups">
+                    </select>
+
+
+                    <br />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="kapat" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" id="ekle" onclick="AddFunc();" class="btn btn-primary"><span id="buttonValue"></span></button>
+                <div class="spinner-border" style="visibility:hidden;" id="spin">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Validate Modal -->
+<div class="modal fade" id="deleteCheck" data-bs-backdrop="static" tabindex="-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kayıt Silmeyi Onaylıyor musun?</h5>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" onclick="sendDelete();" class="btn btn-danger">Onaylıyorum</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    agvGroupList = document.getElementById("AgvGroupName");
+    let liItem;
+    let delItem = 0;
+    @foreach (var item in Model.agvgroups)
+    {
+        <text>
+            liItem = document.createElement("option");
+            liItem.innerText = '@item.AgvGroupName.ToString()';
+            agvGroupList.appendChild(liItem);
+        </text>
+    }
+
+    function clearFormData() {
+        document.getElementsByName("AgvId").value = "";
+        document.getElementsByName("AgvName").value = "";
+        document.getElementsByName("AgvGroupName").value = "";
+    }
+
+    function delOperation(id)
+    {
+        delItem = id;
+    }
+
+    function sendDelete() {
+        let form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", '@Url.Action("agvSettings", "Settings")');
+
+        var hiddenField1 = document.createElement("input");
+        hiddenField1.setAttribute("type", "hidden");
+        hiddenField1.setAttribute("name", "AgvId");
+        hiddenField1.setAttribute("value", delItem);
+        form.appendChild(hiddenField1);
+
+        var hiddenField2 = document.createElement("input");
+        hiddenField2.setAttribute("type", "hidden");
+        hiddenField2.setAttribute("name", "AgvName");
+        hiddenField2.setAttribute("value", "delete");
+        form.appendChild(hiddenField2);
+        document.body.appendChild(form);
+        console.log(form)
+        form.submit();
+    }
+
+    function openDialog(indicator, AgvId, AgvName, AgvGroupName) {
+        if (indicator == 1) {
+            clearFormData()
+            document.getElementById("buttonValue").innerText = "Ekle";
+        } else if (indicator == 2) {
+            clearFormData()
+            
+            document.getElementById("AgvId").value = AgvId;
+            document.getElementById("AgvName").value = AgvName;
+            document.getElementById("AgvGroupName").value = AgvGroupName;
+            document.getElementById("buttonValue").innerText = "Düzenle";
+        }
+    }
+
+    function AddFunc() {
+        let form2 = document.getElementById("AddForm");
+        form2.submit();
+    }
+
+
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+            && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+</script>

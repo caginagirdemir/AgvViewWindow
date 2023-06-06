@@ -1,0 +1,65 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "Symbolic Point Bilgileri";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="margin: 15px;font-weight: 700;color: rgb(0, 0, 0);">Symbolic Hold Bilgileri <div class="spinner-border" style="visibility:hidden;" id="spin"> </h1></div>
+        <div class="col-2">
+            <button id="yenileButton" data-bs-toggle="modal" data-bs-target="#validate" class="btn btn-outline-danger">Navithor->Db Yenile</button>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover" style="margin-top : 1%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 20%">SymbolicPointId</th>
+                <th scope="col" style="width: 40%">Position X</th>
+                <th scope="col" style="width: 40%">Position Y</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.symbolicpointinfos)
+            {
+                <tr>
+                    <th scope="row">@item.SymbolicpointId</th>
+                    <th scope="row">@item.PosX</th>
+                    <th scope="row">@item.PosY</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Validate Modal -->
+<div class="modal fade" id="validate" tabindex="-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Server mesajı gönderilecektir! Onaylıyor musun?</h5>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="cancelButton" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <form action="@Url.Action("symbolicInfo","Settings", new { status = 1})" method="post">
+                    <button type="submit" onclick="waiting();" class="btn btn-danger">Onaylıyorum</button>
+               </form>
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function waiting () {
+        document.getElementById("cancelButton").click()
+        document.getElementById("yenileButton").style.visibility = "hidden";
+        document.getElementById("spin").style.visibility = "visible";
+    }
+</script>

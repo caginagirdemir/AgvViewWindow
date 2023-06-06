@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Canlı İzleme Ekranı 1";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
+<div class="container-fluid border">
+
+    <div class="row" >
+        <div class="col-3 border border-danger rounded">
+            <div class="container-fluid" >
+                <div class="row bg-danger border-danger rounded my-1">
+                    <div class="col-9"><h6>Alert 1</h6></div>
+                    <div class="col-3">12:00</div>
+                </div>
+                <div class="row bg-danger border-danger rounded my-1">
+                    <div class="col-9"><h6>Alert 2</h6></div>
+                    <div class="col-3">12:00</div>
+                </div>
+                <div class="row bg-white border-outline-danger rounded my-1">
+                    <div class="col-9"><h6>No Error</h6></div>
+                    <div class="col-3"></div>
+                </div>
+                <div class="row bg-white border-outline-danger rounded my-1">
+                    <div class="col-9"><h6>No Error</</h6></div>
+                    <div class="col-3"></div>
+                </div>
+                <div class="row bg-white border-outline-danger rounded my-1">
+                    <div class="col-9"><h6>No Error</</h6></div>
+                    <div class="col-3"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3 border border-success rounded">asd</div>
+        <div class="col-3 border border-success rounded">asd</div>
+        <div class="col-3 border border-success rounded">asd</div>
+    </div>
+    <div class="row" >
+        <div id="map" style="width:100%; height:100%;"></div>
+    </div>
+
+</div>
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+<script src="~/lib/leaflet/leaflet.js"></script>
+<script>
+    let bounds = [
+        [0, 0], // padding
+        [60, 125], // image dimensions
+    ];
+    let map = L.map("map", {
+        crs: L.CRS.Simple,
+        maxZoom: 3,
+        minZoom: 3,
+        maxBounds: bounds,
+    });
+    var image = L.imageOverlay("maps/bolu_map.png", bounds).addTo(map);
+    map.fitBounds(bounds);
+</script>
+ 

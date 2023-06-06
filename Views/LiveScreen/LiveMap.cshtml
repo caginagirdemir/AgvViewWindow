@@ -1,0 +1,195 @@
+﻿@{
+    ViewData["Title"] = "Canlı İzleme Ekranı 1";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
+<style>
+    *,
+    :after,
+    :before {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+    }
+
+    html {
+        height: 100%;
+    }
+
+    body,
+    html,
+    #map {
+        width: 100%;
+        height: 100%;
+        background-color: white;
+    }
+
+    body {
+        position: relative;
+        min-height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f1f1f1;
+    }
+
+</style>
+<div id="map"></div>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/symbolicPoints.js"></script>
+<script src="~/js/wayPoints.js"></script>
+<script src="~/lib/leaflet/leaflet.js"></script>
+
+<script>
+    let bounds = [
+        [0, 0], // padding
+        [60, 125], // image dimensions
+    ];
+
+    let map = L.map("map", {
+        crs: L.CRS.Simple,
+        maxZoom: 7,
+        minZoom: 3,
+        maxBounds: bounds,
+    });
+    
+    map.attributionControl.addAttribution('🇹🇷 Arcelik');
+    // method fitBounds sets a map view
+    // that contains the given geographical bounds with the
+    // maximum zoom level possible.
+    map.fitBounds(bounds);
+
+    const popupOptions = {
+        // className: "test",
+        // closeButton: false
+    };
+
+
+
+
+    for (let x in symbolicPoints) {
+        L.circle([(symbolicPoints[x][1] - 30), (symbolicPoints[x][0] - 90)], { radius: 0.05 }).addTo(map).bindPopup(String(symbolicPoints[x][2]), popupOptions);
+    }
+
+    console.log("ok!")
+
+    let points = []
+
+    for (let x in wayPoints) {
+        let wayPointLength = wayPoints[x][0];
+        for (let index = 0; index < wayPointLength; index++) {
+            points.push([(wayPoints[x][index + 1][1] - 30), (wayPoints[x][index + 1][0] - 90)])
+        }
+        let wayName = wayPoints[x][wayPointLength + 1];
+        //console.log(wayName)
+        L.polyline(points, { color: "black", opacity: 0.5, weight: 3 }).bindPopup(wayName).addTo(map);
+        points = []
+    }
+
+
+
+
+    // SignalR Section
+    var connection = new signalR.HubConnectionBuilder().withUrl("http://127.0.0.1:4242/mesHub").configureLogging(signalR.LogLevel.Information).build();
+
+    //var agvLayer = L.featureGroup();
+    //if (map.hasLayer(agvLayer)) {
+    //    map.removeLayer(agvLayer)
+    //}
+    //map.addLayer(agvLayer);
+    let agvList = [];
+
+    var positions = {};
+    var headings = {};
+
+    var agv_durations = {};
+
+    var legends = {};
+    var legend_divs = {};
+    var legend_texts = {};
+
+    let machineId = 0;
+
+    //let posX = 0;
+    //let posY = 0;
+    //let H = 0;
+    //let speed = 0;
+
+    let message;
+
+    async function start() {
+        try {
+            await connection.start();
+            console.log("SignalR Connected.");
+
+            connection.on("mes310", function (machineId, posX, posY, batteryLevel, speedStatus, stage, interruptionStatus, chargeStatus) {
+
+
+                if (positions.hasOwnProperty(machineId)) {
+
+                    positions[machineId].setLatLng([posY - 30, posX - 90])
+                    //headings[message.machineId].setLatLng([[message.posY - 30, message.posX - 90], [(message.posY - 30), (message.posX - 89.5) * Math.cos(message.H)]])
+                    //console.log(message.polePosFlag)
+                    if (speedStatus) {
+                        legend_texts[machineId] = "<h2>ICarry " + machineId + "</h2>"
+                        legend_texts[machineId] += "<p>🚚"
+                        agv_durations[machineId] = 0
+                        legend_divs[machineId].setAttribute("style", "border: 1px solid black;")
+                    } else {
+                        legend_texts[machineId] = "<h2>ICarry " + machineId + "</h2>"
+                        legend_texts[machineId] += "<p>🛑 or going backwards"
+                        
+                    }
+                  
+
+
+                    legend_divs[message.machineId].innerHTML = legend_texts[message.machineId]
+
+
+                }
+                else {
+                    if(posX > 0 && posY > 0)
+                    {
+                        legends[machineId] = L.control({ position: "topleft" });
+                        legends[machineId].onAdd = function () {
+                            legend_divs[machineId] = L.DomUtil.create("div", "description");
+                            L.DomEvent.disableClickPropagation(legend_divs[machineId]);
+
+                            legend_texts[machineId] = "<h2>ICarry " + machineId + "</h2>"
+
+                            if (speedStatus) {
+                                legend_texts[machineId] += "🚚"
+                            } else {
+                                legend_texts[machineId] += "🛑"
+                            }
+                        
+
+                            legend_divs[machineId].insertAdjacentHTML("beforeend", legend_texts[machineId]);
+
+                            return legend_divs[machineId];
+                        };
+                        legends[machineId].addTo(map);
+                        positions[machineId] = new L.circle([posY - 30, posX - 90], 0.5, { color: 'red', fillColor: '#f03', fillOpacity: 1 });
+                        positions[machineId].bindPopup(String(machineId))
+                        positions[machineId].addTo(map)
+                        agv_durations[machineId] = 0;
+
+                        //headings[message.machineId] = new L.polyline([[message.posY - 30, message.posX - 90], [(message.posY - 30), (message.posX - 89.5) * Math.cos(message.H)]], { color: 'blue', weight: 5 }).addTo(map);
+                    }
+                }
+
+            });
+
+        } catch (err) {
+            console.log(err);
+            setTimeout(start, 5000);
+        }
+    };
+
+    connection.onclose(async () => {
+        //await start();
+    });
+
+    // Start the connection.
+    start();
+</script>

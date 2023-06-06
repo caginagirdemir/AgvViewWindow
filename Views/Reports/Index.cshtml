@@ -1,0 +1,498 @@
+﻿@model AgvViewWindow.Models.ReportModel
+@{
+    ViewData["Title"] = "Raporlar Genel Bakış";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" />
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+    .bb-axis line, .bb-axis .domain {
+        stroke: white
+    }
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+    #barChart_1 .bb-xgrid-line line {stroke: blue;}
+    #barChart_1 .bb-xgrid-line.grid4 line {stroke: pink;}
+    #barChart_1 .bb-xgrid-line.grid4 text {fill: pink;}
+    #barChart_1 .bb-ygrid-line line {stroke: red;}
+    #barChart_1 .bb-ygrid-line.grid800 line {stroke: red;}
+    #barChart_1 .bb-ygrid-line.grid800 line {stroke-width: 3px;}
+    #barChart_1 .bb-ygrid-line.grid800 text {fill: red;}
+</style>
+
+    <div class="container-fluid">
+        <div class="row my-2">
+            <div class="col-10">
+                <h1 style="margin: 15px; font-weight: 700;color: rgb(26, 209, 26);">
+                    <form action="@Url.Action("Export","Reports", new {theDay=@Model.dates})" method="POST">
+                        Cycle Time Dashboard
+                            <button class="btn btn-outline-success btn-sm">Export</button>
+                    </form>
+                    
+                </h1>
+                
+            </div>
+            <div class="col-2 ">
+                <h6 style="color: white;">(@Model.dates.Count()) Date(s) Calculated</h6>
+                <form action="@Url.Action("Index","Reports")" method="POST">
+                    <input type="text" id="datepick" name="theDay" width="176" autocomplete="off" />
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid" >
+        <div class="row my-2">
+            <div class="col-2 border border-success rounded px-1" >
+                <div class="card bg-dark" style="height: 16rem;  text-align: center; margin-top: 15px;  ">
+                    <div class="card-body" style="font-size: 32px; font-weight: 700; ">
+                        <span style="color:white;">Av. AGV Speed:</span>
+                        <br>
+                        <span style="font-size: 58px; color:white;">@Model.daily_average_speed</span>
+                        <br>
+                        <h6 style="color:white;">m/min</h6>
+                    </div>
+                </div>
+                <div class="card bg-dark" style="height: 15rem;  text-align: center; margin-top: 15px;  margin-bottom: 15px; ">
+                    <div class="card-body" style="font-size: 32px;font-weight: 700;">
+                        <span style="color:white;">Av. AGV Cycle Time:</span>
+                        <br>
+                        <span style="font-size: 58px; color:white;">@Model.daily_average_min</span>
+                        <br>
+                        <h6 style="color:white;">minutes</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-3" >
+                <div class="border border-success rounded  px-1 "> 
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-8"><p style="color: white; font-weight: 700;">Av. Speed By AGV Group (m/min)</p></div>
+                            <div class="col-4" mt-2"><a target="_blank" href="@Url.Action("targetSettings","Settings")" class="btn btn-outline-primary btn-sm">Set Target</a></div>
+                        </div>
+                    </div>
+                    
+                    <div id="barChart_1" style="margin-left: -20px;"></div>
+                </div>
+            </div>
+            
+            <div class="col-7">
+                <div class="border border-success rounded  px-1">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-8">
+                                <p style="color: white; font-weight: 700;margin-top: 10px;">Average Cycle Time By WorkStation</p>
+                            </div>
+                            <div class="col-2 mt-2">
+                                <div class="dropdown">
+                                  <button class="btn btn-secondary btn-sm dropdown-toggle " type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Station Groups
+                                  </button>
+                                  <ul id="stationGroupList" class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                  </ul>
+                                </div>
+                            </div>
+                            <div class="col-2 mt-2">
+                                <div class="dropdown">
+                                  <button class="btn btn-secondary btn-sm dropdown-toggle " type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Stations
+                                  </button>
+                                  <ul id="stationList" class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                  </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="barChart_4" style="margin-left: -20px;"></div>
+                </div>
+                @foreach (string item in Model.dates)
+                {
+                    <h6 style="color:aliceblue">@item</h6>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="~/lib/d3/d3.min.js"></script>
+    <script src="~/js/billboard.js"></script>
+
+    <script>
+
+        $("#datepick").datepicker({
+            format: "dd/mm/yyyy",
+            //autoclose: true,
+            //todayHighlight: true,
+            orientation: 'auto bottom',
+            endDate: '-1d',
+            language: "tr",
+            weekStart: 1,
+            clearBtn: true,
+            multidate: true,
+            multidateSeparator: "-",
+            daysOfWeekHighlighted: "0,6",
+        });
+
+        $("#datepick").on("hide", function (e) {
+            let date = document.getElementById("datepick").value;
+            if(date != "")
+            {
+                $(this).closest('form').submit();
+            }
+        });
+
+    var agvTypeNames = []
+    var agvTypeSpeedDaily = ["range"]
+    var agvTypeSpeedMonthly = ["monthly"]
+    var agvTypeSpeedYearly = ["yearly"]
+
+    var stationGroupTypeNames = []
+    var stationTypeGroupsforNames = []
+    var stationTypeNames = []
+    var stationTypeSpeedDaily = ["range"]
+    var stationTypeSpeedMonthly = ["monthly"]
+    var stationTypeSpeedYearly = ["yearly"]
+
+    let optimumValStr = "@Model.optimum_speed.ToString()";
+    optimumValStr = optimumValStr.replace(',', '.');
+
+
+    @foreach (string item in Model.agvTypeName)
+    {
+        <text>
+            agvTypeNames.push("@item.ToString()")
+        </text>
+    };
+
+    @foreach (string item in Model.agvTypeSpeedDaily)
+    {
+        <text>
+            if(agvTypeNames.length > 0)
+            {
+                let str = "@item.ToString()";
+                let speed = str.replace(",", ".");
+                agvTypeSpeedDaily.push(speed)
+            }
+        </text>
+    };
+    @foreach (string item in Model.agvTypeSpeedMonthly)
+    {
+        <text>
+            if(agvTypeNames.length > 0)
+            {
+                str = "@item.ToString()";
+                speed = str.replace(",", ".");
+                agvTypeSpeedMonthly.push(speed)
+            }
+        </text>
+    };
+    @foreach (string item in Model.agvTypeSpeedYearly)
+    {
+        <text>
+            if(agvTypeNames.length > 0)
+            {
+                str = "@item.ToString()";
+                speed = str.replace(",", ".");
+                agvTypeSpeedYearly.push(speed)
+            }
+        </text>
+    };
+
+    @foreach (string item in Model.stationGroupTypeName)
+    {
+        <text>
+            if(!stationGroupTypeNames.includes("@item.ToString()"))
+            {
+                stationGroupTypeNames.push("@item.ToString()")
+            }
+            stationTypeGroupsforNames.push("@item.ToString()")
+        </text>
+    };
+
+    @foreach (string item in Model.stationTypeName)
+    {
+        <text>
+            stationTypeNames.push("@item.ToString()")
+        </text>
+    };
+
+    @foreach (string item in Model.stationTypeSpeedDaily)
+    {
+        <text>
+            str = "@item.ToString()";
+            speed = str.replace(",", ".");
+            stationTypeSpeedDaily.push(speed)
+        </text>
+    };
+
+    @foreach (string item in Model.stationTypeSpeedMonthly)
+    {
+        <text>
+            str = "@item.ToString()";
+            speed = str.replace(",", ".");
+            stationTypeSpeedMonthly.push(speed)
+        </text>
+    };
+
+    @foreach (string item in Model.stationTypeSpeedYearly)
+    {
+        <text>
+            str = "@item.ToString()";
+            speed = str.replace(",", ".");
+            stationTypeSpeedYearly.push(speed)
+        </text>
+    }
+
+    let stationList = document.getElementById("stationList");
+    for (let i = 0; i < stationTypeNames.length; i++) {
+        let li = document.createElement("li");
+        let input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = "checkboxStation"+i;
+        input.value = stationTypeNames[i];
+        input.checked = true;
+        input.setAttribute("onclick", "changeStationTypeName("+i+")");
+        li.appendChild(input);
+        li.appendChild(document.createTextNode(stationTypeNames[i]));
+        stationList.appendChild(li);
+    }
+
+    let stationGroupList = document.getElementById("stationGroupList");
+    for (let i = 0; i < stationGroupTypeNames.length; i++) {
+        let li = document.createElement("li");
+        let input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = "checkboxStationGroup"+i;
+        input.value = stationGroupTypeNames[i];
+        input.checked = true;
+        input.setAttribute("onclick", "changeByStationGroup("+i+")");
+        li.appendChild(input);
+        li.appendChild(document.createTextNode(stationGroupTypeNames[i]));
+        stationGroupList.appendChild(li);
+    }
+
+    let visibledData = [];
+    let visibledDataForGroup = [];
+    function changeByStationGroup(id)
+    {
+        let checkBox;
+        for (let i=0; i<stationTypeGroupsforNames.length; i++)
+        {
+            if(stationTypeGroupsforNames[i] == stationGroupTypeNames[id])
+            {
+                checkBox = document.getElementById("checkboxStation"+i).checked;
+                groupItemCheckBox = document.getElementById("checkboxStationGroup"+id).checked;
+                if(groupItemCheckBox == false)
+                {
+                    if(checkBox == true)
+                    {
+                        document.getElementById("checkboxStation"+i).checked = false;
+                        changeStationTypeName(i);
+                    }
+                } else 
+                {
+                    if(checkBox == false)
+                    {
+                        document.getElementById("checkboxStation"+i).checked = true;
+                        changeStationTypeName(i);
+                    }
+                }
+            }
+        }
+    }
+
+    function changeStationTypeName(id)
+    {
+        var _StationTypeSpeedDaily = [];
+        var _StationTypeSpeedMonthly = [];
+        var _StationTypeSpeedYearly = [];
+        var _StationTypeNames = [];
+        let checkBox = document.getElementById("checkboxStation"+id).checked;
+        if(checkBox == false)
+        {
+            visibledData.push(id+1);
+        } else 
+        {
+            let index = visibledData.findIndex(element => element == id+1);
+            visibledData.splice(index, 1);
+        }
+        _StationTypeSpeedDaily = structuredClone(stationTypeSpeedDaily);
+        _StationTypeSpeedMonthly = structuredClone(stationTypeSpeedMonthly);
+        _StationTypeSpeedYearly = structuredClone(stationTypeSpeedYearly);
+
+        _StationTypeNames = structuredClone(stationTypeNames);
+        for (let i=0; i<visibledData.length; i++)
+        {
+            _StationTypeSpeedDaily.splice(visibledData[i], 1, -1);
+            _StationTypeSpeedMonthly.splice(visibledData[i], 1, -1);
+            _StationTypeSpeedYearly.splice(visibledData[i], 1, -1);
+
+            _StationTypeNames.splice(visibledData[i] - 1, 1, -1);
+        };
+
+        for (let i=0; i < visibledData.length; i++)
+        {
+            let temp_index = _StationTypeNames.findIndex(item => item == -1);
+            _StationTypeNames.splice(temp_index, 1);
+            _StationTypeSpeedDaily.splice(temp_index + 1, 1);
+            _StationTypeSpeedMonthly.splice(temp_index + 1, 1);
+            _StationTypeSpeedYearly.splice(temp_index + 1, 1);
+        };
+
+        chartStationSpeedDaily.load({
+            columns: [
+                _StationTypeSpeedDaily,
+                _StationTypeSpeedMonthly,
+                _StationTypeSpeedYearly
+            ],
+            categories: _StationTypeNames
+        });
+    }
+
+    
+
+    //////// agv type section
+    var chartSpeedDaily = bb.generate({
+        title: {
+            //text: "Daily"
+        },
+        size: {
+            //height: 200,
+            //width: 240
+        },
+        data: {
+            columns: [
+                agvTypeSpeedDaily,
+                agvTypeSpeedMonthly,
+                agvTypeSpeedYearly
+            ],
+            types: {
+                range: "bar",
+                monthly: "bar",
+                yearly: "bar"
+            },
+            colors: {
+              range: "#ff0000",
+              monthly: "#00ff00",
+              yearly: "#0000ff"
+            },
+            labels: {
+                colors: "white",
+                centered: true
+            },
+
+        },
+        axis: {
+            y: {
+                tick: {
+                    
+                },
+
+            },
+            x: {
+
+                type: "category",
+                categories: agvTypeNames
+            }
+        },        
+        grid: {
+            y: {
+              show: true,
+              lines: [
+                {
+                  value: optimumValStr,
+                  class: "grid800",
+                  text: "Optimum Speed"
+                }
+              ]
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+
+        legend: {
+            show: true
+        },
+
+        bindto: "#barChart_1"
+    });
+
+    var chartStationSpeedDaily = bb.generate({
+        title: {
+            //text: "Daily"
+        },
+        size: {
+            //height: 200,
+            //width: 240
+        },
+        data: {
+            columns: [
+                stationTypeSpeedDaily,
+                stationTypeSpeedMonthly,
+                stationTypeSpeedYearly,
+            ],
+            types: {
+                range: "bar",
+                monthly: "bar",
+                yearly: "bar"
+            },
+            colors: {
+              range: "#ff0000",
+              monthly: "#00ff00",
+              yearly: "#0000ff"
+            },
+            labels: {
+                colors: "white",
+                centered: true
+            },
+
+        },
+        axis: {
+            y: {
+                tick: {
+                    
+                },
+
+            },
+            x: {
+
+                type: "category",
+                categories: stationTypeNames
+            },
+            height: 130
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+
+        legend: {
+            show: true
+        },
+
+        bindto: "#barChart_4"
+    });
+
+
+    </script>

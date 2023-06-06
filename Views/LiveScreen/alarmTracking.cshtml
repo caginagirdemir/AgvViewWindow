@@ -1,0 +1,192 @@
+﻿@{
+    ViewData["Title"] = "Canlı İzleme Ekranı 1";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+</style>
+
+
+
+    <div id="head_div" class="container-fluid">
+        <div class="row my-2">
+            <div class="col-11"><h1 style="margin: 15px;font-weight: 700;color: rgb(26, 209, 26);">Alarm Takip Ekranı</h1></div>
+            <div class="col-1 ">
+            </div>
+        </div>
+    </div>
+
+
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="~/lib/d3/d3.min.js"></script>
+    <script src="~/js/billboard.js"></script>
+
+    <div class="container-fluid">
+        <div class="row my-4">
+            <div id="agvWindow" class="col-3 border border-success rounded">
+                <div class="div d-flex flex-row my-2">
+                    <div class="px-1 border border-success bg-primary rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700; font-size: 58px;">1</div>
+                    </div>
+                    <div class="px-1 border border-success bg-info rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">13</div>
+                    </div>
+                    <div class="px-1 border border-success bg-secondary rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">14</div>
+                    </div>
+                    <div class="px-1 border border-success rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">14</div>
+                    </div>
+                    <div class="px-1 border border-success rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">14</div>
+                    </div>
+                </div>
+                <div class="div d-flex flex-row my-2">
+                    <div class="px-1 border border-success bg-primary rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700; font-size: 58px;">1</div>
+                    </div>
+                    <div class="px-1 border border-success rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">13</div>
+                    </div>
+                    <div class="px-1 border border-success rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">14</div>
+                    </div>
+                    <div class="px-1 border border-success rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">14</div>
+                    </div>
+                    <div class="px-1 border border-success rounded mx-1" style="width: 5rem;">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 58px;">14</div>
+                    </div>
+                </div>
+                <div class="div d-flex flex-row my-2">
+                </div>
+                <div class="div d-flex flex-row my-2">
+                </div>
+                <div class="div d-flex flex-row my-2">
+                </div>
+                <div class="div d-flex flex-row my-2">
+                </div>
+                <div class="div d-flex flex-row my-2">
+                </div>
+                <div class="div">
+                    <i class="fa-solid fa-circle" style="color: #3f61fe;"></i> <span style="color:white">Parked</span>
+                    <i class="fa-solid fa-circle" style="color: #ff3620;"></i> <span style="color:white">Stopped</span>
+                    <i class="fa-solid fa-circle" style="color: #ffed0d;"></i> <span style="color:white">Waiting</span>
+                    <i class="fa-solid fa-circle" style="color: #858585;"></i> <span style="color:white">Other</span>
+                    <i class="fa-solid fa-circle" style="color: #0bff85;"></i> <span style="color:white">Working</span>
+                    <br>
+                    <i class="fa-solid fa-circle" style="color: #70a0f1;"></i> <span style="color:white">Breakdown</span>
+                </div>
+            </div>
+
+            <div class="col-9 ">
+                <div class="div border border-success rounded px-2">
+                    <div class="p" style="color: white;font-weight: 700;font-size: 24px;">AGV Durum Paneli</div>
+                    <br>
+                    <table class="table table-dark table-striped ">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 10%">AGV ID</th>
+                                <th scope="col" style="width: 60%">Error</th>
+                                <th scope="col" style="width: 30%">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-danger">
+                                <th scope="row">-</th>
+                                <td>No Error</td>
+                                <td>00:00:00</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <th scope="row">-</th>
+                                <td>No Error</td>
+                                <td>00:00:00</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">-</th>
+                                <td>No Error</td>
+                                <td>00:00:00</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">-</th>
+                                <td>No Error</td>
+                                <td>00:00:00</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">-</th>
+                                <td>No Error</td>
+                                <td>00:00:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="div d-flex flex-row my-2">
+                    <div class=" border border-success rounded" style="width: 50%">
+                        <div class="card border" style="width:18rem; text-align: center; margin-top: 15px; background-color: black">
+                            <div class="card-body" style="font-weight: 700; font-size:x-large;color: white;">
+                                Stop Counter
+                                <br>
+                                <span style="font-size: 7vw; color:darkgreen;">123</span>
+                                <br>
+                                <h6>minutes</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" border border-success rounded mx-2" style="width: 50%">
+                        <div class="p" style="color: white;font-weight: 700;font-size: 24px;">Rotadan Çıkma</div>
+                        <br>
+                        <table class="table table-dark table-striped ">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 10%">AGV ID</th>
+                                    <th scope="col" style="width: 30%">Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-danger">
+                                    <th scope="row">-</th>
+                                    <td>00:00:00</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <th scope="row">-</th>
+                                    <td>00:00:00</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">-</th>
+                                    <td>00:00:00</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">-</th>
+                                    <td>00:00:00</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">-</th>
+                                    <td>00:00:00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let div_avg_window = document.getElementById("agvWindow");
+        agv_divs = {}
+
+                // for (let i = 0; i < 15; i++) {
+                //     agv_divs[i] = document.createElement("div");
+                //     agv_divs[i].className = "border px-4 my-2 border-success rounded";
+                //     div_avg_window.appendChild(agv_divs[i]);
+                // }
+    </script>

@@ -1,0 +1,117 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "smSettings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="margin: 15px;font-weight: 700;color: rgb(0, 0, 0);">Supermarket Tanımlamaları <div class="spinner-border" style="visibility:hidden;" id="spin"> </h1></div>
+        <div class="col-2">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#supermarketEkle">
+            Supermarket Ekle
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover" style="margin-top : 1%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 10%">SupermarketId</th>
+                <th scope="col" style="width: 30%">SupermarketName</th>
+                <th scope="col" style="width: 10%">SupermarketSymbolicPointId</th>
+                <th scope="col" style="width: 40%">SupermarketPreReleaseId</th>
+                <th scope="col" style="width: 10%">Sil</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.supermarkets)
+            {
+                <tr>
+                    <th scope="row">@item.SupermarketId</th>
+                    <th scope="row">@item.SupermarketName</th>
+                    <th scope="row">@item.SupermarketSymbolicPoint</th>
+                    <th scope="row">@item.SupermarketSymbolicPrePoint</th>
+                    <th scope="row"><button class="btn btn-danger" data-bs-toggle="modal" onclick="setDelPreReleasePointId(@item.SupermarketId);" data-bs-target="#deleteCheck"><i class="fa-solid fa-xmark" style="color:#ffffff"></i></button></th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="supermarketEkle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ekleme Penceresi</h5>
+                <button type="button" id="kapat2" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="CustomPreReleaseForm" action="@Url.Action("customPreRelease","Settings")" method="POST">
+                    <label for="errorid" class="form-label">Supermarket Adı</label>
+                    <input type="text" id="PreReleasePointId"  class="form-control" name="PreReleasePointId" autocomplete="off" maxlength="4">
+                    <br />
+                    <label for="errorid" class="form-label">Supermarket Symbolic Point Id</label>
+                    <input type="text" id="ToSymbolicPointId" onkeypress="return isNumberKey(event)" class="form-control" name="ToSymbolicPointId" autocomplete="off" maxlength="4">
+                    <br />
+                    <label for="errorid" class="form-label">Supermarket PreRelease Symbolic Point Id</label>
+                    <input type="text" id="ToSymbolicPointId" onkeypress="return isNumberKey(event)" class="form-control" name="ToSymbolicPointId" autocomplete="off" maxlength="4">
+                    <br />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete Validate Modal -->
+<div class="modal fade" id="deleteCheck" tabindex="-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kayıt Silmeyi Onaylıyor musun?</h5>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" onclick="sendPreReleaseDel();" class="btn btn-danger">Onaylıyorum</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function delSupermarket(id) {
+        $("#deleteCheck").on("shown.bs.modal", function () {
+            $("#deleteCheck").find("#deleteButton").on("click", function () {
+                $("#deleteCheck").modal("hide");
+                $("#spin").css("visibility", "visible");
+                $.ajax({
+                    type: "POST",
+                    url: "/Settings/delSupermarket",
+                    data: { id: id },
+                    success: function (data) {
+                        $("#spin").css("visibility", "hidden");
+                        $("#yenileButton").click();
+                    }
+                });
+            });
+        });
+    }
+
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+            && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+</script>

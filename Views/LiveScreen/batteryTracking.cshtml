@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Canlı İzleme Ekranı 1";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+    .bb-axis line, .bb-axis .domain {
+        stroke: white
+    }
+
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+</style>
+
+<div id="head_div" class="container-fluid">
+    <div class="row my-2">
+        <div class="col-11"><h1 style="margin: 15px;font-weight: 700;color: rgb(26, 209, 26);">Batarya Takip Ekranı</h1></div>
+        <div class="col-1 ">
+        </div>
+    </div>
+</div>
+
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/lib/d3/d3.min.js"></script>
+<script src="~/js/billboard.js"></script>
+<script>
+
+    agvList = {}
+    agvGaugeList = {}
+
+    var connection = new signalR.HubConnectionBuilder().withUrl("http://localhost:5001/mesHub").configureLogging(signalR.LogLevel.Information).build();
+    document.body.onload = addElement;
+
+    function addElement() {
+
+        let console_p = document.createElement("p");
+        console_p.setAttribute("style", "color: white;");
+        console_p.innerHTML = "Hub Connecting ...";
+        document.body.appendChild(console_p);
+
+        connection.start()
+            .then(() => document.body.removeChild(console_p));
+        
+         //create a new div element
+        const container_main = document.createElement("div");
+        container_main.className = "container-fluid";
+
+        const row_main = document.createElement("div");
+        row_main.className = "row my-4";
+        container_main.appendChild(row_main);
+
+        document.body.appendChild(container_main);
+
+        connection.on("mes310", function (machineId, posX, posY, batteryLevel, speedStatus, navitrolState, targetPoint, lastPointlastPoint, chargeStatus) {
+
+            if (!agvGaugeList.hasOwnProperty(machineId)) {
+                let main_div = document.createElement("div");
+                main_div.className = "col-2";
+                let sub_div = document.createElement("div");
+                sub_div.setAttribute("id", "subdiv" + machineId);
+                sub_div.className = "border px-4 my-2 border-success rounded";
+
+                let div_p = document.createElement("p");
+                div_p.setAttribute("style", "color: white;font-weight: 700;margin-top: 10px;font-size: 24px;");
+                div_p.innerText = machineId + " ";
+                let arrow_i = document.createElement("i");
+                arrow_i.className = "fa-solid fa-arrow-right fa-fade";
+                div_p.appendChild(arrow_i);
+
+                let target_p = document.createElement("span");
+                target_p.setAttribute("id", "targetp" + machineId);
+                target_p.innerHTML = " t";
+                div_p.appendChild(target_p);
+
+                let div_gauge = document.createElement("div");
+                div_gauge.setAttribute("id", "gauge" + machineId);
+
+                sub_div.appendChild(div_p);
+                sub_div.appendChild(div_gauge);
+
+                main_div.appendChild(sub_div);
+                row_main.appendChild(main_div);
+
+                agvGaugeList[machineId] = bb.generate({
+                    data: { columns: [["data", 0]], type: "gauge" },
+                    color: {
+                        pattern: ["#FF0000", "#F97600", "#F6C600", "#60B044"],
+                        threshold: { values: [30, 60, 90, 100] }
+                    },
+                     size: {height: 180},
+                    legend: { show: false },
+                    bindto: "#gauge" + machineId
+                });
+                console.log("a");
+                
+            } else
+            {
+                if (chargeStatus == 1)
+                {
+                    document.getElementById("subdiv" + machineId).setAttribute("style", "background-color: #ffff0050;");
+                } else 
+                {
+                    document.getElementById("subdiv" + machineId).setAttribute("style", "background-color: black;");
+                }
+                
+                if (navitrolState == 9)
+                {
+                    document.getElementById("subdiv" + machineId).setAttribute("style", "background-color: #ff000050;");
+                    document.getElementById("targetp" + machineId).innerHTML = targetPoint;
+                    document.getElementById("targetp" + machineId).innerHTML += "(Fast Stopped)";
+                } else
+                {
+                    document.getElementById("subdiv" + machineId).setAttribute("style", "background-color: black;");
+                    document.getElementById("targetp" + machineId).innerHTML = targetPoint;
+                }
+
+                
+                agvGaugeList[machineId].load({ columns: [["data", batteryLevel]] });
+
+            }
+        });
+    }
+
+</script>

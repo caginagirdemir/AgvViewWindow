@@ -1,0 +1,346 @@
+﻿@model AgvViewWindow.Models.WsModel
+@{
+    ViewData["Title"] = "Raporlar Genel Bakış";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" />
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+    .bb-axis line, .bb-axis .domain {
+        stroke: white
+    }
+
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+
+    #styleForGrid .bb-ygrid-line line {
+        stroke: red;
+    }
+
+    #styleForGrid .bb-ygrid-line.grid800 line {
+        stroke: red;
+    }
+
+    #styleForGrid .bb-ygrid-line.grid800 text {
+        fill: red;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row my-2">
+        <div class="col-10">
+            <h1 style="margin: 15px;font-weight: 700;color: rgb(26, 209, 26);">
+                <form action="@Url.Action("Export","Reports", new {theDay=@Model.date})" method="POST">
+                    WS Dashboard
+                    <button class="btn btn-outline-success btn-sm">Export</button>
+                </form>
+            </h1>
+        </div>
+        <div class="col-2">
+            <h6 style="color: white;">Tarih (@Model.date)</h6>
+            <form action="@Url.Action("WSDashboard","Reports")" method="POST">
+                <input type="text" id="datepick" name="theDay" width="176" autocomplete="off" />
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+<script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script src="~/lib/d3/d3.min.js"></script>
+<script src="~/js/billboard.js"></script>
+
+
+<div class="container-fluid">
+    <div class="row my-1">
+        <div class="col-9">
+            <div class="border px-1 border-success rounded">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-10">
+                            <p style="color: white;font-weight: 700;">Av. AGV Stoppage Duration in Zones (min.)</p>
+                        </div>
+                        <div class="col-2  mt-2">
+                            <div class="dropdown">
+                                <button class="btn btn-secondary btn-sm dropdown-toggle " type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Error Groups
+                                </button>
+                                <ul id="errorsList" class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="barChart_2" style="margin-left: -20px;"></div>
+                
+                <p style="color: white;font-weight: 700;">Av. AGV Entry Duration in Workstation (min.)</p>
+                <div id="barChart_1" style="margin-left: -20px;"></div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="border px-4 border-success rounded">
+                <div id="pieChart_1" style="margin-left: -20px;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    $("#datepick").datepicker({
+        format: "dd/mm/yyyy",
+        autoclose: true,
+        //todayHighlight: true,
+        orientation: 'auto bottom',
+        endDate: '-1d',
+        language: "tr",
+        weekStart: 1,
+        daysOfWeekHighlighted: "0,6",
+    });
+
+    $("#datepick").on("change", function (e) {
+        $(this).closest('form').submit();
+    });
+
+    workstations = [];
+    errorShortList = [];
+    toDropList = ["toDrop"];
+    toOutList = ["toOut"];
+    errorList = ["error"];
+
+    zones = [];
+    zoneValues = ["data1"];
+
+    let str;
+
+    @foreach (var item in Model.errorList)
+    {
+        <text>
+            errorShortList.push("@item");
+        </text>
+    }
+
+    let stationList = document.getElementById("errorsList");
+    for (let i = 0; i < errorShortList.length; i++) {
+        let li = document.createElement("li");
+        let input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = "checkboxStation" + i;
+        input.value = errorList[i];
+        input.checked = true;
+        //input.setAttribute("onclick", "changeStationTypeName(" + i + ")");
+        li.appendChild(input);
+        li.appendChild(document.createTextNode(errorShortList[i]));
+        stationList.appendChild(li);
+    }
+
+    @foreach (var item in Model.workStationList)
+    {
+        <text>
+            workstations.push("@item");
+        </text>
+    }
+
+    @foreach (var item in Model.toDropTime)
+    {
+        <text>
+            str = "@item";
+            str = str.replace(",", ".");
+            toDropList.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.toOutTime)
+    {
+        <text>
+            str = "@item";
+            str = str.replace(",", ".");
+            toOutList.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.stopedTime)
+    {
+        <text>
+            str = "@item";
+            str = str.replace(",", ".");
+        errorList.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.zones)
+    {
+        <text>
+            zones.push("@item");
+            zoneValues.push(1);
+        </text>
+    }
+
+    var chart = bb.generate({
+        title: {
+            //text: "Daily"
+        },
+        size: {
+            height: 250,
+            //width: 240
+        },
+        data: {
+            columns: [
+                toDropList,
+                toOutList,
+                errorList
+            ],
+            types: {
+                toDrop: "bar",
+                toOut: "bar",
+                error: "bar",
+            },
+            labels: {
+                colors: "white",
+                centered: true
+            },
+            colors: {
+                toDrop: "#00ff00",
+                toOut: "#0000ff",
+                error: "#ffff00",
+            },
+
+        },
+        axis: {
+            y: {
+                tick: {
+                },
+
+            },
+            x: {
+
+                type: "category",
+                categories: workstations
+            },
+            height: 130
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true,
+                lines: [
+                    {
+                        value: 5,
+                        text: "Threshold",
+                        class: "",
+                    },
+                ]
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+        legend: {
+            show: true
+        },
+
+        bindto: "#barChart_1"
+    });
+
+    var chart3 = bb.generate({
+        title: {
+            //text: "Daily"
+        },
+        size: {
+            height: 250,
+            //width: 240
+        },
+        data: {
+            columns: [
+                zoneValues
+            ],
+            types: {
+                data1: "bar",
+                
+            },
+            labels: {
+                colors: "white",
+                centered: true
+            },
+            colors: {
+                data1: "#0000ff",
+            },
+
+        },
+        axis: {
+            y: {
+                tick: {
+                },
+
+            },
+            x: {
+
+                type: "category",
+                categories: zones
+            },
+            height: 130
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true,
+                lines: [
+                    {
+                        value: 5,
+                        text: "Threshold",
+                        class: "",
+                    },
+                ]
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+        legend: {
+            show: true
+        },
+
+        bindto: "#barChart_2"
+    });
+
+    var chart2 = bb.generate({
+        size: {
+            //height: 240,
+            //width: 480
+        },
+        data: {
+            columns: [
+                ["Stopped", 30],
+                ["Utilization", 70],
+            ],
+            colors: {
+                Stopped: "#00ff00",
+                Utilization: "#0000ff",
+            },
+            type: "donut", // for ESM specify as: donut()
+        },
+        donut: {
+            title: "WS Utilization"
+        },
+        legend: {
+            show: true
+        },
+        bindto: "#pieChart_1"
+    });
+
+
+
+</script>

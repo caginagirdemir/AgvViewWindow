@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "defaultProvider": "unpkg",
+  "libraries": [
+    {
+      "library": "@microsoft/signalr@6.0.6",
+      "destination": "wwwroot/js/signalr/",
+      "files": [
+        "dist/browser/signalr.js",
+        "dist/browser/signalr.min.js"
+      ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "leaflet@1.9.3",
+      "destination": "wwwroot/lib/leaflet/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap-datepicker@1.9.0",
+      "destination": "wwwroot/lib/bootstrap-datepicker/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "json2csv@5.0.7",
+      "destination": "wwwroot/lib/json2csv/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap-colorpicker@3.4.0",
+      "destination": "wwwroot/lib/bootstrap-colorpicker/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "popper.js@2.11.7",
+      "destination": "wwwroot/lib/popper.js/"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "Target Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="margin: 15px;font-weight: 700;color: rgb(0, 0, 0);">Target Ayarları </h1></div>
+        <div class="col-2">
+        </div>
+    </div>
+</div>
+
+<div class="container mx-3">
+    <div class="row">
+
+        <div class="col-4" id="form">
+        <form action="@Url.Action("targetSettings","Settings")" method="POST">
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon1">Battery Level (%)</span>
+                <input type="text" class="form-control" name="BatteryLevel" onkeypress="return isNumberKey(event)" placeholder="50" aria-describedby="basic-addon1" maxlength="4" value="@Model.targets.BatteryLevel">
+            </div>
+
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon2">Agv Optimum Speed</span>
+                <input type="text" class="form-control" name="AgvOptimumSpeed" placeholder="0,5" aria-describedby="basic-addon2" maxlength="4" value="@Model.targets.AgvOptimumSpeed">
+            </div>
+
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon3">Agv Utilization Ratio Threshold</span>
+                <input type="text" class="form-control" name="AgvUtilRatio" onkeypress="return isNumberKey(event)" placeholder="1" aria-describedby="basic-addon3" maxlength="4" value="@Model.targets.AgvUtilRatio">
+            </div>
+
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon3">SuperMarket Loading Time Threshold </span>
+                <input type="text" class="form-control" name="SmLoad" onkeypress="return isNumberKey(event)" placeholder="1" aria-describedby="basic-addon3" maxlength="4" value="@Model.targets.SmLoad">
+            </div>
+
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon3">SuperMarket Waiting Time Threshold (min.)</span>
+                <input type="text" class="form-control" name="SmWaiting" onkeypress="return isNumberKey(event)" placeholder="1" aria-describedby="basic-addon3" maxlength="4" value="@Model.targets.SmWaiting">
+            </div>
+
+            <div class="input-group mb-3 ">
+                <span class="input-group-text" id="basic-addon3">WorkStation Waiting Time Threshold (min.)</span>
+                <input type="text" class="form-control" name="WsWaiting" onkeypress="return isNumberKey(event)" placeholder="1" aria-describedby="basic-addon3" maxlength="4" value="@Model.targets.WsWaiting">
+            </div>
+
+            <button type="submit"  id="saveButton" class="btn btn-success">Save</button>
+        </form>
+        </div>
+        <div class="col-8 px-5">
+        </div>
+
+    </div>
+</div>
+
+

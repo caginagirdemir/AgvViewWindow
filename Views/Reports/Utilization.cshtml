@@ -1,0 +1,229 @@
+﻿@model AgvViewWindow.Models.UtilizationModel
+@{
+    ViewData["Title"] = "Raporlar Genel Bakış";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" />
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+    .bb-axis line, .bb-axis .domain {
+        stroke: white
+    }
+
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row my-2">
+        <div class="col-10">
+            <h1 style="margin: 15px;font-weight: 700;color: rgb(26, 209, 26);">
+                <form action="@Url.Action("Export","Reports", new {theDay=@Model.date})" method="POST">
+                    WS Dashboard
+                    <button class="btn btn-outline-success btn-sm">Export</button>
+                </form>
+            </h1>
+        </div>
+        <div class="col-2">
+            <h6 style="color: white;">Tarih (@Model.date)</h6>
+            <form action="@Url.Action("WSDashboard","Reports")" method="POST">
+                <input type="text" id="datepick" name="theDay" width="176" autocomplete="off" />
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+<script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script src="~/lib/d3/d3.min.js"></script>
+<script src="~/js/billboard.js"></script>
+
+<div class="container-fluid">
+
+    <div class="row ">
+        <div class="col-2 border border-success rounded ">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Usage Rates</p>
+            <div id="pieChart_1" ></div>
+            <div id="pieChart_2"></div>
+            
+        </div>
+        <div class="col-2 border border-success rounded ">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Error Rates</p>
+            <div id="pieChart_4"></div>
+            <div id="pieChart_5"></div>
+
+        </div>
+        <div class="col-8 border border-success rounded ">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Utilization Rate by AGV</p>
+            <div id="barChart_4" style="margin-left: -20px;"></div>
+            
+    </div>
+
+</div>
+
+<script>
+    var chart = bb.generate({
+            size: {
+                height: 200,
+                width: 200
+            },
+            data: {
+                columns: [
+                    ["Stopped", 30],
+                    ["Utilization", 70],
+                ],
+                type: "donut", 
+            },
+            donut: {
+                title: "Daily"
+            },
+            legend: {
+                show: true
+            },
+            bindto: "#pieChart_1"
+        });
+
+    var chart = bb.generate({
+            size: {
+                height: 200,
+                width: 200
+            },
+            data: {
+                columns: [
+                    ["Stopped", 30],
+                    ["Utilization", 70],
+                ],
+                type: "donut", 
+            },
+            donut: {
+                title: "Monthly"
+            },
+            legend: {
+                show: true
+            },
+                bindto: "#pieChart_2"
+        });
+
+
+    //var chart = bb.generate({
+    //        size: {
+    //            height: 200,
+    //            width: 200
+    //        },
+    //        data: {
+    //            columns: [
+    //                ["Stopped", 30],
+    //                ["Utilization", 70],
+    //            ],
+    //            type: "donut", 
+    //        },
+    //        donut: {
+    //            title: "Daily"
+    //        },
+    //        legend: {
+    //            show: false
+    //        },
+    //        bindto: "#pieChart_3"
+    //    });
+
+        var chart = bb.generate({
+            size: {
+                height: 200,
+                width: 200
+            },
+            data: {
+                columns: [
+                    ["Laser Scanner", 30],
+                    ["Hardware", 50],
+                    ["Fleet Control", 20],
+                ],
+                type: "donut", // for ESM specify as: donut()
+            },
+            donut: {
+                title: "Daily"
+            },
+            legend: {
+                show: true
+            },
+            bindto: "#pieChart_4"
+        });
+
+        var chart = bb.generate({
+            size: {
+                height: 200,
+                width: 200
+            },
+            data: {
+                columns: [
+                    ["Laser Scanner", 30],
+                    ["Hardware", 50],
+                    ["Fleet Control", 20],
+                ],
+                type: "donut", 
+            },
+            donut: {
+                title: "Monthly"
+            },
+            legend: {
+                show: true
+            },
+            bindto: "#pieChart_5"
+        });
+
+        //var chart = bb.generate({
+        //    size: {
+        //        height: 200,
+        //        width: 200
+        //    },
+        //    data: {
+        //        columns: [
+        //            ["Laser Scanner", 30],
+        //            ["Hardware", 50],
+        //            ["Fleet Control", 20],
+        //        ],
+        //        type: "donut",  for ESM specify as: donut()
+        //    },
+        //    donut: {
+        //        title: "Daily"
+        //    },
+        //    legend: {
+        //        show: false
+        //    },
+        //    bindto: "#pieChart_6"
+        //});
+
+
+
+
+        var chart2 = bb.generate({
+            data: {
+                x: "x",
+                columns: [
+                    ["x", "ICarry1", "ICarry2", "ICarry3", "ICarry4", "ICarry5", "ICarry6", "ICarry7"],
+                    ["Stopped", 30, 280, 951, 400, 150, 546, 4528],
+                    ["Utilization", 130, 357, 751, 400, 150, 250, 3957],
+                ],
+                type: "bar", // for ESM specify as: bar()
+                groups: [
+                    [
+                        "Stopped",
+                        "Utilization",
+                    ]
+                ],
+                stack: {
+                    normalize: true
+                }
+            },
+            axis: {
+                x: {
+                    type: "category"
+                }
+            },
+            bindto: "#barChart_4"
+        });
+
+</script>

@@ -1,0 +1,540 @@
+﻿@model AgvViewWindow.Models.SmWaitingModel
+@{
+    ViewData["Title"] = "Raporlar Genel Bakış";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" />
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+    .bb-axis line, .bb-axis .domain {
+        stroke: white
+    }
+
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row my-2">
+        <div class="col-10">
+            <h1 style="margin: 15px;font-weight: 700;color: rgb(26, 209, 26);">
+                <form action="@Url.Action("Export","Reports", new {theDay=@Model.dates})" method="POST">
+                    SM Dashboard
+                    <button class="btn btn-outline-success btn-sm">Export</button>
+                </form>
+            </h1>
+        </div>
+        <div class="col-2">
+            <h6 style="color: white;">(@Model.dates.Count()) Date(s) Calculated</h6>
+            <form action="@Url.Action("SMDashboard","Reports")" method="POST">
+                <input type="text" id="datepick" name="theDay" width="176" autocomplete="off" />
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container-fluid" >
+    <div class="row my-2">
+        <div class="col-3 border border-success rounded px-1 ">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Av. Loading Duration in Supermarkets (m.)</p>
+            <div id="barChart_1" style="margin-left: -20px;"></div>
+        </div>
+        <div class="col-3 border border-success rounded px-1">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Av. AGV Waiting Duration in Supermarkets (m.)</p>
+            <div id="barChart_4" style="margin-left: -20px;"></div>
+
+        </div>
+        <div class="col-6 border border-success rounded px-1">
+
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-10">
+                        <p style="color: white; font-weight: 700;margin-top: 10px;">Av. AGV Loading Duration in Supermarkets (m.)</p>
+                    </div>
+                    <div class="col-2 mt-2">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle " type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                Supermarkets
+                            </button>
+                            <ul id="supermarketList" class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="barChart_7" style="height: 200px;"></div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <p style="color: white; font-weight: 700;margin-top: 10px;">Av. Waiting Duration in Supermarkets (m.)</p>
+                    </div>
+                </div>
+            </div>
+            <div id="barChart_8" style="height: 200px;"></div>
+        </div>
+    </div>
+
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+<script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script src="~/lib/d3/d3.min.js"></script>
+<script src="~/js/billboard.js"></script>
+<script>
+
+    $("#datepick").datepicker({
+        format: "dd/mm/yyyy",
+        //autoclose: true,
+        //todayHighlight: true,
+        orientation: 'auto bottom',
+        endDate: '-1d',
+        language: "tr",
+        weekStart: 1,
+        clearBtn: true,
+        multidate: true,
+        multidateSeparator: "-",
+        daysOfWeekHighlighted: "0,6",
+    });
+
+    $("#datepick").on("hide", function (e) {
+        $(this).closest('form').submit();
+    });
+
+    
+
+    let supermarket_Names = [];
+    
+    let loadTimeline = [];
+    let loadTimelineCount = [];
+    
+    let waitTimeline = [];
+    let waitTimelineCount = [];
+
+    let loadDaily = ["daily"];
+    let loadMonthly = ["monthly"];
+    let loadYearly = ["yearly"];
+
+    let waitDaily = ["daily"];
+    let waitMonthly = ["monthly"];
+    let waitYearly = ["yearly"];
+
+
+    let str;
+    @foreach (var item in Model.SuperMarketNames)
+    {
+        <text>
+            supermarket_Names.push("@item.ToString()");
+        </text>
+    }
+
+    //TimeLine fullfilment
+
+    @foreach (var item in Model.LoadTimeLine)
+    {
+        @foreach (var itemDouble in item)
+        {
+            <text>
+                str = "@itemDouble.ToString()";
+                str = str.replace(",", ".");
+                loadTimeline.push(str);
+            </text>
+        }
+    }
+
+    @foreach (var item in Model.LoadTimeLineCount)
+    {
+        @foreach (var itemDouble in item)
+        {
+            <text>
+                str = "@itemDouble.ToString()";
+                str = str.replace(",", ".");
+                loadTimelineCount.push(str);
+            </text>
+        }
+    }
+
+    @foreach (var item in Model.WaitingTimeLine)
+    {
+        @foreach (var itemDouble in item)
+        {
+            <text>
+            str = "@itemDouble.ToString()";
+            str = str.replace(",", ".");
+            waitTimeline.push(str);
+            </text>
+        }
+    }
+
+    @foreach (var item in Model.WaitingTimeLineCount)
+    {
+        @foreach (var itemDouble in item)
+        {
+            <text>
+            str = "@itemDouble.ToString()";
+            str = str.replace(",", ".");
+            waitTimelineCount.push(str);
+            </text>
+        }
+    }
+
+    @foreach (var item in Model.LoadSMValueDaily)
+    {
+        <text>
+            str = "@item.ToString()";
+            str = str.replace(",", ".");
+            loadDaily.push(str);
+        </text>
+    }
+    @foreach (var item in Model.LoadSMValueMonthly)
+    {
+        <text>
+            str = "@item.ToString()";
+            str = str.replace(",", ".");
+            loadMonthly.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.LoadSMValueYearly)
+    {
+        <text>
+            str = "@item.ToString()";
+            str = str.replace(",", ".");
+            loadYearly.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.WaitingSMValueDaily)
+    {
+        <text>
+            str = "@item.ToString()";
+            str = str.replace(",", ".");
+            waitDaily.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.WaitingSMValueMonthly)
+    {
+        <text>
+            str = "@item.ToString()";
+            str = str.replace(",", ".");
+            waitMonthly.push(str);
+        </text>
+    }
+
+    @foreach (var item in Model.WaitingSMValueYearly)
+    {
+        <text>
+            str = "@item.ToString()";
+            str = str.replace(",", ".");
+            waitYearly.push(str);
+        </text>
+    }
+
+    let supermarket_List = document.getElementById("supermarketList");
+    for (let i = 0; i < supermarket_Names.length; i++) {
+        let li = document.createElement("li");
+        let a = document.createElement("a");
+        a.setAttribute("class", "dropdown-item");
+        a.setAttribute("href", "#");
+        a.innerText = supermarket_Names[i];
+        li.appendChild(a);
+        supermarket_List.appendChild(li);
+    }
+
+    var chart = bb.generate({
+        title: {
+            //text: "Daily"
+        },
+        data: {
+            columns: [
+                loadDaily,
+                loadMonthly,
+                loadYearly
+            ],
+            types: {
+                daily: "bar",
+                monthly: "bar", 
+                yearly: "bar"
+            },
+            colors: {
+                daily: "#ff0000",
+                monthly: "#00ff00",
+                yearly: "#0000ff"
+            },
+            labels: {
+                colors: "white",
+                centered: true
+            },
+
+        },
+        axis: {
+            y: {
+                tick: {
+                },
+
+            },
+            x: {
+
+                type: "category",
+                categories: supermarket_Names
+            },
+            //height: 130
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+        legend: {
+            show: true
+        },
+
+        bindto: "#barChart_1"
+    });
+
+
+    var chart = bb.generate({
+        title: {
+            //text: "Daily"
+        },
+        data: {
+            columns: [
+                waitDaily,
+                waitMonthly,
+                waitYearly
+            ],
+            types: {
+                daily: "bar",
+                monthly: "bar",
+                yearly: "bar"
+             
+            },
+            colors: {
+                daily: "#ff0000",
+                monthly: "#00ff00",
+                yearly: "#0000ff"
+            
+            },
+            labels: {
+                colors: "white",
+                centered: true
+            },
+
+        },
+        axis: {
+            y: {
+                tick: {
+                },
+
+            },
+            x: {
+
+                type: "category",
+                categories: supermarket_Names
+            },
+            //height: 130
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+        legend: {
+            show: true
+        },
+
+        bindto: "#barChart_4"
+    });
+
+
+    var chart2 = bb.generate({
+        title: {
+            text: "Daily"
+        },
+        data: {
+            json: {
+                avr: loadTimeline,
+                count: loadTimelineCount
+            },
+            types: {
+                avr: "line",
+                count: "bar",
+            }, 
+            colors: {
+                avr: "#ff0000",
+                count: "#00ff00",
+            },
+            axes: {
+                avr: "y",
+                count: "y2"
+            }
+        },
+        axis: {
+
+            y: {
+                tick: {
+                },
+
+            },
+            x: {
+                type: "category",
+                categories: ["00-02", "02-04", "04-06", "06-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-20", "20-22", "22-24"],
+            },
+            y2: {
+                show: true,
+                label: "Count",
+                colors: "white"
+            }
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true
+            },
+            
+        },
+        legend: {
+            show: false
+        },
+        zoom: {
+            enabled: true, // for ESM specify as: zoom()
+            type: "drag"
+        },
+        bindto: "#barChart_7"
+    });
+    var chart3 = bb.generate({
+        title: {
+            text: "Daily"
+        },
+        data: {
+            json: {
+                avr: waitTimeline,
+                count: waitTimelineCount
+            },
+            types: {
+                avr: "line",
+                count: "bar",
+            }, 
+            colors: {
+                avr: "#ff0000",
+                count: "#00ff00",
+            },
+            axes: {
+                avr: "y",
+                count: "y2"
+            }
+        },
+        axis: {
+
+            y: {
+                tick: {
+                },
+
+            },
+            x: {
+                type: "category",
+                categories: ["00-02", "02-04", "04-06", "06-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-20", "20-22", "22-24"],
+            },
+            y2: {
+                show: true,
+                label: "Count",
+                colors: "white"
+            }
+        },
+        grid: {
+            x: {
+                show: false,
+            },
+            y: {
+                show: true
+            }
+        },
+        legend: {
+            show: false
+        },
+        zoom: {
+            enabled: true, // for ESM specify as: zoom()
+            type: "drag"
+        },
+        bindto: "#barChart_8"
+    });
+
+    //var chart4 = bb.generate({
+    //    title: {
+    //        text: "Daily"
+    //    },
+    //    data: {
+    //        columns: [
+    //            ["data1", 51, 150, 88, 61, 79, 21],
+    //        ],
+    //        types: {
+    //            data1: "bar",  for ESM specify as: bar()
+    //        },
+    //        labels: {
+    //            colors: "white",
+    //            centered: true
+    //        },
+
+    //    },
+    //    axis: {
+    //        y: {
+    //            tick: {
+
+    //                values: [0, 50, 100, 150],
+    //            },
+
+    //        },
+    //        x: {
+
+    //            type: "category",
+    //            categories: ["SM1\nQP", "SM1\nASRS", "SM2\nÖK", "SM2\nÜT", "SM3\nMotor", "SM3\nDenge"]
+    //        },
+    //        height: 130
+    //    },
+    //    grid: {
+    //        x: {
+    //            show: false,
+    //        },
+    //        y: {
+    //            show: true
+    //        }
+    //    },
+    //    bar: {
+    //        width: {
+    //            ratio: 0.5
+    //        }
+    //    },
+
+    //    legend: {
+    //        show: false
+    //    },
+
+    //    bindto: "#barChart_9"
+    //});
+
+</script>

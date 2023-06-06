@@ -1,0 +1,173 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "Zone Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="font-weight: 700;color: rgb(0, 0, 0);">Zone Tanımlamaları</h1></div>
+        <div class="col-2 ">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal1" onclick="openDialog(1);">
+                Zone Ekle
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover" style="margin-top : 1%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 5%"></th>
+                <th scope="col" style="width: 5%"></th>
+                <th scope="col" style="width: 10%">Zone Id</th>
+                <th scope="col" style="width: 20%">Zone Name</th>
+                <th scope="col" style="width: 15%">Zone X 0</th>
+                <th scope="col" style="width: 15%">Zone Y 0</th>
+                <th scope="col" style="width: 15%">Zone X 1</th>
+                <th scope="col" style="width: 15%">Zone Y 1</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.zones)
+            {
+                <tr>
+                    <th scope="row"><button class="btn btn-warning" data-bs-toggle="modal" onclick="openDialog(2, @item.ZoneId, '@item.ZoneName.ToString()', @item.ZoneXZero, @item.ZoneYZero, @item.ZoneXOne, @item.ZoneYOne );" data-bs-target="#modal1">Edit</button></th>
+                    <th scope="row"><button class="btn btn-danger" data-bs-toggle="modal" onclick="delZone(@item.ZoneId);" data-bs-target="#deleteCheck">Del</button></th>
+                    <th scope="row">@item.ZoneId</th>
+                    <th scope="row">@item.ZoneName</th>
+                    <th scope="row">@item.ZoneXZero</th>
+                    <th scope="row">@item.ZoneYZero</th>
+                    <th scope="row">@item.ZoneXOne</th>
+                    <th scope="row">@item.ZoneYOne</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal1" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Zone Ekleme/Düzenleme Penceresi</h5>
+                <button type="button" id="kapat2" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="zoneAdd" action="@Url.Action("zoneSettings","Settings")" method="POST">
+                    <label class="form-label">Zone Id</label>
+                    <input type="text" id="ZoneId" class="form-control" name="ZoneId" autocomplete="off" readonly>
+                    <br />
+                    <label class="form-label">Zone Name</label>
+                    <input type="text" id="ZoneName" class="form-control" name="ZoneName" autocomplete="off">
+                    <br />
+                    <label class="form-label">Zone X 0</label>
+                    <input type="text" id="ZoneXZero" class="form-control" name="ZoneXZero" autocomplete="off" placeholder="111.00" maxlength="6">
+                    <br />
+                    <label class="form-label">Zone Y 0</label>
+                    <input type="text" id="ZoneYZero" class="form-control" name="ZoneYZero" autocomplete="off" placeholder="111.00" maxlength="6">
+                    <br />
+                    <label class="form-label">Zone X 1</label>
+                    <input type="text" id="ZoneXOne" class="form-control" name="ZoneXOne" autocomplete="off" placeholder="111.00" maxlength="6">
+                    <br />
+                    <label for="errorid" class="form-label">Zone Y 1</label>
+                    <input type="text" id="ZoneYOne" class="form-control" name="ZoneYOne" autocomplete="off" placeholder="111.00" maxlength="6">
+                    <br />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="kapat" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" id="ekle" onclick="sendZoneAdd();" class="btn btn-primary"><span id="buttonValue"></span></button>
+                <div class="spinner-border" style="visibility:hidden;" id="spin">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Validate Modal -->
+<div class="modal fade" id="deleteCheck" data-bs-backdrop="static" tabindex="-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kayıt Silmeyi Onaylıyor musun?</h5>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="submit" onclick="sendDelete();" class="btn btn-danger">Onaylıyorum</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let delZoneId = 0;
+
+    function clearFormData() {
+        document.getElementsByName("ZoneId").value = "";
+        document.getElementsByName("ZoneName").value = "";
+        document.getElementsByName("ZoneXZero").value = "";
+        document.getElementsByName("ZoneYZero").value = "";
+        document.getElementsByName("ZoneXOne").value = "";
+        document.getElementsByName("ZoneYOne").value = "";
+    }
+
+    function sendDelete() {
+
+        let form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", '@Url.Action("zoneSettings", "Settings")');
+
+        var hiddenField1 = document.createElement("input");
+        hiddenField1.setAttribute("type", "hidden");
+        hiddenField1.setAttribute("name", "ZoneId");
+        hiddenField1.setAttribute("value", delZoneId);
+        form.appendChild(hiddenField1);
+
+        var hiddenField2 = document.createElement("input");
+        hiddenField2.setAttribute("type", "hidden");
+        hiddenField2.setAttribute("name", "ZoneName");
+        hiddenField2.setAttribute("value", "delete");
+        form.appendChild(hiddenField2);
+        document.body.appendChild(form);
+        console.log(form)
+        form.submit();
+    }
+
+    function openDialog(indicator, zoneId, zoneName, zoneXzero, zoneYzero, zoneXone, zoneYone) {
+        if (indicator == 1) {
+            clearFormData()
+            document.getElementById("buttonValue").innerText = "Ekle";
+        } else if (indicator == 2) {
+            clearFormData()
+            document.getElementById("ZoneId").value = zoneId;
+            document.getElementById("ZoneName").value = zoneName;
+            document.getElementById("ZoneXZero").value = zoneXzero;
+            document.getElementById("ZoneYZero").value = zoneYzero;
+            document.getElementById("ZoneXOne").value = zoneXone;
+            document.getElementById("ZoneYOne").value = zoneYone;
+            document.getElementById("buttonValue").innerText = "Düzenle";
+        }
+    }
+
+    function sendZoneAdd() {
+        let form2 = document.getElementById("zoneAdd");
+        form2.submit();
+    }
+
+    function delZone(id)
+    {
+        delZoneId = id;
+    }
+
+
+</script>

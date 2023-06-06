@@ -1,0 +1,100 @@
+﻿@model AgvViewWindow.Models.MainModel
+@{
+    ViewData["Title"] = "Symbolic Point Bilgileri";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<div class="container">
+    <div class="row my-2">
+        <div class="col-10"><h1 style="margin: 15px;font-weight: 700;color: rgb(0, 0, 0);">Symbolic Hold Bilgileri <div class="spinner-border" style="visibility:hidden;" id="spin"> </h1></div>
+        <div class="col-2">
+            <button id="yenileButton" data-bs-toggle="modal" data-bs-target="#validate" class="btn btn-outline-danger">Navithor->Db Yenile</button>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover" style="margin-top : 1%">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 20%">Symbolic Point Id</th>
+                <th scope="col" style="width: 40%">Symbolic Point Type</th>
+                <th scope="col" style="width: 30%">Symbolic Point Name</th>
+                <th scope="col" style="width: 10%">Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Symbolicpointnames)
+            {
+                <tr>
+                    <th scope="row">@item.SymbolicPointId</th>
+                    <th scope="row">@item.SymbolicPointType</th>
+                    <th scope="row" id="@item.SymbolicPointId">@item.SymbolicPointName1</th>
+                    
+                    <th scope="row"><button class="btn btn-warning" id="button_@item.SymbolicPointId" onclick="editpoint(@item.SymbolicPointId);"><i id="icon_@item.SymbolicPointId" class="fa-solid fa-pen-to-square" style="color:#ffffff"></i></button></th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Validate Modal -->
+<div class="modal fade" id="validate" tabindex="-2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Server mesajı gönderilecektir! Onaylıyor musun?</h5>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="cancelButton" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <form action="@Url.Action("symbolicName","Settings", new { status = 1})" method="post">
+                    <button type="submit" onclick="waiting();" class="btn btn-danger">Onaylıyorum</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function waiting() {
+        document.getElementById("cancelButton").click()
+        document.getElementById("yenileButton").style.visibility = "hidden";
+        document.getElementById("spin").style.visibility = "visible";
+    }
+
+    function editpoint(id) {
+        document.getElementById(id).innerHTML = "<input type='text' id='input" + id + "' value='" + document.getElementById(id).innerHTML + "'></input>";
+        document.getElementById("button_" + id).className = "btn btn-success"
+        document.getElementById("button_" + id).setAttribute("onclick", "saveedit("+id+")");
+        document.getElementById("icon_" + id).className = "fa-solid fa-check"
+    }
+
+    function saveedit(id)
+    {
+        let form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", '@Url.Action("setSymbolicName", "Settings")');
+
+        var hiddenField1 = document.createElement("input");
+        hiddenField1.setAttribute("type", "hidden");
+        hiddenField1.setAttribute("name", "SPId");
+        hiddenField1.setAttribute("value", id);
+        form.appendChild(hiddenField1);
+
+        var hiddenField2 = document.createElement("input");
+        hiddenField2.setAttribute("type", "hidden");
+        hiddenField2.setAttribute("name", "nameVal");
+        hiddenField2.setAttribute("value", document.getElementById("input"+id).value);
+        form.appendChild(hiddenField2);
+
+        document.body.appendChild(form);
+        form.submit();
+        console.log("test");
+    }
+
+</script>

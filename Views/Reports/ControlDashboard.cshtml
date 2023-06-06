@@ -1,0 +1,96 @@
+﻿@model AgvViewWindow.Models.UtilizationModel
+@{
+    ViewData["Title"] = "Control Dashboard";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.css" />
+<link rel="stylesheet" href="~/css/billboard.css">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+<style>
+    .bb-axis line, .bb-axis .domain {
+        stroke: white
+    }
+
+    body {
+        overflow: hidden;
+        background-color: black;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row my-2">
+        <div class="col-10">
+            <h1 style="margin: 15px;font-weight: 700;color: rgb(26, 209, 26);">
+                    Control Dashboard
+                    <button class="btn btn-outline-success btn-sm">Export</button>
+            </h1>
+        </div>
+        <div class="col-2">
+            <form action="@Url.Action("WSDashboard","Reports")" method="POST">
+                <input type="text" id="datepick" name="theDay" width="176" autocomplete="off" />
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+<script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script src="~/lib/d3/d3.min.js"></script>
+<script src="~/js/billboard.js"></script>
+
+<div class="container-fluid">
+
+    <div class="row ">
+        <div class="col-2 border border-success rounded ">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Stoppage Rate by Shifts</p>
+            <div id="pieChart_1"></div>
+        </div>
+        <div class="col-10 border border-success rounded ">
+            <p style="color: white;font-weight: 700;margin-top: 10px;">Av. Agv Problem Solving Duration (min.)</p>
+            <div id="barChart_1"></div>
+        </div>
+        
+    </div>
+
+</div>
+<script>
+    var chart2 = bb.generate({
+        
+        data: {
+            columns: [
+            ["Stopped", 30],
+            ["Utilization", 70],
+            ],
+        colors: {
+            Stopped: "#00ff00",
+            Utilization: "#0000ff",
+        },
+            type: "donut", 
+        },
+        donut: {
+            title: "WS Utilization"
+        },
+        legend: {
+            show: true
+        },
+        bindto: "#pieChart_1"
+    });
+
+    var chart = bb.generate({
+        data: {
+            columns: [
+                ["shift1", 30, 200, 100, 400, 150, 250],
+                ["shift2", 130, 100, 140, 200, 150, 50],
+                ["shift3", 130, 100, 140, 200, 150, 50]
+            ],
+            type: "bar", // for ESM specify as: bar()
+        },
+        bar: {
+            width: {
+                ratio: 0.5
+            }
+        },
+        bindto: "#barChart_1"
+    });
+</script>

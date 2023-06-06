@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agv View Window</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AgvViewWindow.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <div class="px-3 py-2 bg-dark text-white">
+            <div class="container">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                    <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+                        Arçelik Agv İzleme Penceresi
+                    </a>
+
+                    <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+                        <li>
+                            <a href="@Url.Action("Index","Home")" class="nav-link text-secondary">
+                                <i class="bi bi-house"></i>
+                                Ev
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="TrackScreens" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Takip Ekranları
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="TrackScreens">
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("alarmTracking","LiveScreen")">Alarm Dashboard</a></li>
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("Index","LiveScreen")">Haritalı Takip Ekranı</a></li>
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("batteryTracking","LiveScreen")">Batarya Takip Ekranı</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="Reports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Raporlama Ekranları
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="Reports">
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("Index","Reports")">Cycle Time Dashboard</a></li>
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("SMDashboard","Reports")">SM Dashboard</a></li>
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("WSDashboard","Reports")">WS Dashboard</a></li>
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("Utilization","Reports")">Utilization Dashboard</a></li>
+                                <li><a class="dropdown-item" target="_blank" href="@Url.Action("ControlDashboard","Reports")">Control Dashboard</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="ayarlar" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ayarlar
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="ayarlar">
+                                <li><a class="dropdown-item" href="@Url.Action("zoneSettings","Settings")">Zone Tanımlamaları</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("agvSettings","Settings")">Agv Tanımlamaları</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("agvGroupSettings","Settings")">Agv Grup Tanımlamaları</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("targetSettings","Settings")">Hedef Tanımlamaları</a></li>
+
+                                <li><a class="dropdown-item" href="@Url.Action("errorSettings","Settings")">Hata Tanımlamaları</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("mesBridgeSettings","Settings")">MES Bridge Ayarları</a></li>
+
+
+
+                                <li><a class="dropdown-item" href="@Url.Action("symbolicHold","Settings")">Symbolic Point Hold Bilgileri</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("symbolicInfo","Settings")">Symbolic Point Position Bilgileri</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("symbolicName","Settings")">Symbolic Point Name Bilgileri</a></li>
+                            </ul>
+                        </li>
+                       
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <div class="container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
